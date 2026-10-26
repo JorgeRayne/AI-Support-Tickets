@@ -1,7 +1,13 @@
 import express from 'express'
 import databaseConnection from "./config/database.js";
+import ticket from './routes/ticket.js';
 
 const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded());
+
+app.use('/api/tickets', ticket);
 
 const startServer = async () => {
     try {
