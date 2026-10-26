@@ -1,25 +1,13 @@
 import express from 'express';
-import { Router } from 'express';
+import ticketController from '../contorllers/ticketController.js';
 
 const ticket = express.Router();
 
-ticket.post('/', (req, res) => {
-    console.log('post')
-    res.status(201).json({
-        message: 'hehe'
-    });
-})
+ticket.post('/', ticketController.createTicket);
 
-ticket.get('/', (req, res) => {
-    console.log('get')
-    res.status(201).json({
-        message: 'hehe'
-    });
-})
+ticket.get('/', ticketController.getTickets);
 
-ticket.get('/:id', (req, res) => {
-
-})
+ticket.get('/:id' , ticketController.getTicket);
 
 ticket.patch('/:id/assign', (req, res) => {
 
