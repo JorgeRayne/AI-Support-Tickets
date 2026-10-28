@@ -5,7 +5,7 @@ import ticket from './routes/ticket.js';
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true}));
 
 app.use('/api/tickets', ticket);
 
