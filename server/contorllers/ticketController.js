@@ -45,51 +45,61 @@ async function createTicket(req, res) {
 
 async function getTicket(req, res) {
     try {
-        const ticket = await ticketService.getTicket(req.params.id) // catch errors
+        const ticket = await ticketService.getTicket(req.params.id);
 
-        if(!ticket){
-            throw new Error('Ticket not Found')
+        if (!ticket) {
+            return res.status(404).json({
+                success: false,
+                message: "Ticket not found",
+            });
         }
-        res.status(201).json({
-            message: 'success',
-            data: ticket
-        })
+
+        return res.status(200).json({
+            success: true,
+            data: ticket,
+        });
     } catch (error) {
-        res.status(201).json({
-            message: 'failed',
-            data: ticket
-        })
-    }   
-    
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
 }
 
 async function updateAgent(req, res) {
-    const id = req.params.id;
-    const {assignedAgent} = req.body;
+    const { id } = req.params;
+    const { assignedAgent } = req.body;
 
-    if(!assignedAgent){
-         return res.json({
-            message:'failed',
+    if (!assignedAgent) {
+        return res.status(400).json({
+            success: false,
+            message: "assignedAgent is required",
         });
     }
 
     try {
-        const request = await ticketService.updateAgent(id, assignedAgent)
+        const ticket = await ticketService.updateAgent(id, assignedAgent);
 
-        if(!request){
-            return res.status(400).json({
-                message: 'Unable to update'
+        if (!ticket) {
+            return res.status(404).json({
+                success: false,
+                message: "Ticket not found",
             });
         }
+
+        return res.status(200).json({
+            success: true,
+            message: "Agent assigned successfully",
+            data: ticket,
+        });
     } catch (error) {
+        console.error("Error assigning agent:", error);
+
         return res.status(400).json({
-            message:error
-        })
+            success: false,
+            message: error.message,
+        });
     }
-
-    
-
-
 }
 
 export default{

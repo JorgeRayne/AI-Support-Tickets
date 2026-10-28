@@ -33,10 +33,12 @@ async function getTicket(id) {
     }
 }
 
-async function updateAgent(id, requestBody) {
-    const ticket = Tickets.findByIdAndUpdate(id, requestBody);
-
-    return ticket;
+async function updateAgent(id, assignedAgent) {
+    return await Tickets.findByIdAndUpdate(
+        id,
+        { assignedAgent: assignedAgent },
+        { new: true, runValidators: true }
+    );
 }
 
 export default {
