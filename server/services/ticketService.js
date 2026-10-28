@@ -33,8 +33,15 @@ async function getTicket(id) {
     }
 }
 
+async function updateAgent(id, requestBody) {
+    const ticket = Tickets.findByIdAndUpdate(id, requestBody);
+
+    return ticket;
+}
+
 export default {
     getTickets,
     createTickets,
     getTicket,
+    updateAgent
 }

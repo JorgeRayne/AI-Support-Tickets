@@ -44,17 +44,57 @@ async function createTicket(req, res) {
 }
 
 async function getTicket(req, res) {
-    const ticket = await ticketService.getTicket(req.params.id)
-    console.log(ticket)
-    res.status(201).json({
-        message: 'success',
-        data: ticket
-    })
+    try {
+        const ticket = await ticketService.getTicket(req.params.id) // catch errors
+
+        if(!ticket){
+            throw new Error('Ticket not Found')
+        }
+        res.status(201).json({
+            message: 'success',
+            data: ticket
+        })
+    } catch (error) {
+        res.status(201).json({
+            message: 'failed',
+            data: ticket
+        })
+    }   
     
+}
+
+async function updateAgent(req, res) {
+    const id = req.params.id;
+    const {assignedAgent} = req.body;
+
+    if(!assignedAgent){
+         return res.json({
+            message:'failed',
+        });
+    }
+
+    try {
+        const request = await ticketService.updateAgent(id, assignedAgent)
+
+        if(!request){
+            return res.status(400).json({
+                message: 'Unable to update'
+            });
+        }
+    } catch (error) {
+        return res.status(400).json({
+            message:error
+        })
+    }
+
+    
+
+
 }
 
 export default{
     getTickets,
     createTicket,
-    getTicket
+    getTicket,
+    updateAgent
 }

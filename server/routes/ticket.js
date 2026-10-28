@@ -9,9 +9,7 @@ ticket.get('/', ticketController.getTickets);
 
 ticket.get('/:id' , ticketController.getTicket);
 
-ticket.patch('/:id/assign', (req, res) => {
-
-})
+ticket.patch('/:id/assign', ticketController.updateAgent)
 
 ticket.patch('/:id/status', (req, res) => {
 
