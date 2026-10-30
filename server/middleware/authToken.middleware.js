@@ -3,13 +3,24 @@ import 'dotenv/config';
 
 export default function authToken(req, res, next) {
     const authHeader = req.headers
-    const authToken = authHeader.authorization.split(" ")[1];
+    const authToken = authHeader?.authorization && authHeader.authorization.split(" ")[1];
 
-    if(!authToken) return res.status(401).json();
+    if(!authToken) return res.status(401).json({ message: "Access token is required." });
 
-    jwt.verify(authToken, process.env.JWT_SECRET_TOKE, (err, user) =>{
-        if(err) return res.status(403);
-        req.user = user;
-    });
-    next();
+    try {
+        const decode = jwt.verify(
+            authToken,
+            process.env.JWT_SECRET_TOKEN,
+            {
+                algorithms: ['HS256']
+            }
+        );
+
+        req.user = decode;
+        next();
+    } catch (error) {
+        return res.status(401).json({
+            message: "Invalid or expired access token."
+        });
+    }
 }
