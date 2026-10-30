@@ -4,11 +4,8 @@ import Tickets from "../models/ticket.model.js";
 
 async function getTickets() {
     console.log("Database:", mongoose.connection.name);
-    // console.log("Collection:", Ticket.collection.name);
 
     const tickets = await Tickets.find();
-
-    console.log("Found tickets:", tickets.length);
     return tickets
 }
 
