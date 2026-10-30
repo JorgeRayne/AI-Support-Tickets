@@ -2,6 +2,7 @@ import express from 'express';
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import authToken from '../middleware/authToken.middleware.js';
 import 'dotenv/config';
 
 const auth = express.Router();
@@ -82,38 +83,82 @@ auth.post('/register', async (req, res) => {
 })
 
 auth.post('/login', async (req, res) => {
+    try {
+        const {email, password} = req.body;
 
-    const {email, password} = req.body;
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !email.trim() ||
+            !password
+        ) {
+            return res.status(400).json({
+                message: "Email and password are required.",
+        });
+        }
 
-    if (
-      typeof email !== "string" ||
-      typeof password !== "string" ||
-      !email.trim() ||
-      !password
-    ) {
-      return res.status(400).json({
-        message: "Email and password are required.",
-      });
+        const user = await User.findOne({email:email.trim().toLowerCase()}).select('+passwordHash');
+
+        if(!user) return res.status(401).json({
+            message: "User not Found",
+        });
+
+        const isMatch = await bcrypt.compare(
+            password,
+            user.passwordHash
+        );
+
+        if (!isMatch) return res.status(401).json({
+            message: "Invalid Email or Password"
+        })
+
+        if (!process.env.JWT_SECRET_TOKEN) {
+            throw new Error("JWT_SECRET_TOKEN is not configured.");
+        }
+
+        const accessToken = jwt.sign(
+            {sub: user._id.toString()}, 
+            process.env.JWT_SECRET_TOKEN,
+            {
+                expiresIn: "15m",
+                algorithm: "HS256"
+            }
+        );
+
+        res.status(200).json({
+            message: 'Login successful.',
+            token: accessToken,
+            user:{
+                id: user._id,
+                user: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Login error:", error);
+
+        return res.status(500).json({
+            message: "An unexpected error occurred."
+        });        
     }
+})
 
-    const user = await User.findOne({email:email}).select('+passwordHash').exec();
-    console.log(user.id)
+auth.get('/me', authToken, async (req, res) => {
+    const id = req.user.sub;
 
-    if(!user) return res.status(401).json({
-        message: "User not Found",
+    if(!id) return res.status(404).json({
+        message: "User not found" 
     });
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    const user = await User.findById(id);
 
-    if (!isMatch) return res.status(401).json({
-        message: "Invalid Email or Password"
-    })
+    if (!user) return res.status(404).json({
+        message: 'No user Found'
+    });
 
-    const accessToken = jwt.sign(user.id, process.env.JWT_SECRET_TOKEN);
-
-    res.status(200).json({
-        message: 'success',
-        accessToken,
+    return res.status(200).json({
+        message: "success",
         user
     });
 })
