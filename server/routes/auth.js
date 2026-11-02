@@ -117,7 +117,11 @@ auth.post('/login', async (req, res) => {
         }
 
         const accessToken = jwt.sign(
-            {sub: user._id.toString()}, 
+            {
+                sub: user._id.toString(),
+                jti: randonUUid,
+                role: user.role,
+            }, 
             process.env.JWT_SECRET_TOKEN,
             {
                 expiresIn: "15m",
@@ -162,5 +166,31 @@ auth.get('/me', authToken, async (req, res) => {
         user
     });
 })
+
+import RevokedToken from "../models/revokedToken.model.js";
+
+auth.post("/logout", authToken, async (req, res) => {
+    try {
+        const { jti, exp } = req.user;
+
+        await RevokedToken.create({
+            jti,
+            expiresAt: new Date(exp * 1000),
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful.",
+        });
+
+    } catch (error) {
+        console.error("Logout error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to logout.",
+        });
+    }
+});
 
 export default auth
