@@ -197,10 +197,12 @@ auth.post("/logout", authToken, async (req, res) => {
     try {
         const { jti, exp } = req.user;
 
-        await RevokedToken.create({
-            jti,
-            expiresAt: new Date(exp * 1000),
+        const revokedToken = new RevokedToken({
+            jti: jti,
+            expiresAt: new Date(exp * 1000)
         });
+
+        await revokedToken.save()
 
         return res.status(200).json({
             success: true,
