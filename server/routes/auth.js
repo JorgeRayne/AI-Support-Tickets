@@ -3,6 +3,8 @@ import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken.middleware.js';
+import RevokedToken from "../models/revokedToken.model.js";
+import { generateTokens } from '../utils/generateTokens.js';
 import 'dotenv/config';
 
 const auth = express.Router();
@@ -116,18 +118,42 @@ auth.post('/login', async (req, res) => {
             throw new Error("JWT_SECRET_TOKEN is not configured.");
         }
 
-        const accessToken = jwt.sign(
-            {
-                sub: user._id.toString(),
-                jti: randonUUid,
-                role: user.role,
-            }, 
-            process.env.JWT_SECRET_TOKEN,
-            {
-                expiresIn: "15m",
-                algorithm: "HS256"
-            }
-        );
+        // const accessToken = jwt.sign(
+        //     {
+        //         sub: user._id.toString(),
+        //         jti: crypto.randomUUID(),
+        //         role: user.role,
+        //     }, 
+        //     process.env.JWT_SECRET_TOKEN,
+        //     {
+        //         expiresIn: "15m",
+        //         algorithm: "HS256"
+        //     }
+        // );
+
+        // const refressToken = jwt.sign(
+        //     {
+        //         sub: user.id.toString(),
+        //         jti: crypto.randomUUID(),
+        //     },
+        //     process.env.JWT_REFRESH_TOKEN,
+        //     {
+        //         expiresIn: "7d",
+        //         algorithm: "HS256"
+        //     }
+        // );
+
+        const tokes = generateTokens(user)
+
+        const {accessToken, refreshToken } = tokes
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/'
+        })
 
         res.status(200).json({
             message: 'Login successful.',
@@ -167,8 +193,6 @@ auth.get('/me', authToken, async (req, res) => {
     });
 })
 
-import RevokedToken from "../models/revokedToken.model.js";
-
 auth.post("/logout", authToken, async (req, res) => {
     try {
         const { jti, exp } = req.user;
@@ -192,5 +216,38 @@ auth.post("/logout", authToken, async (req, res) => {
         });
     }
 });
+
+auth.post('/refresh', async (req ,res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if(!refreshToken) {
+            return res.status(401).json({
+                message: "Refresh token missing."
+            });
+        }
+
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_TOKEN
+        );
+
+        const user = await User.findById(decoded.sub);
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found."
+            });
+        }
+        const newToken = generateTokens(user);
+        return res.status(200).json({
+            token: newToken.accessToken
+        });      
+    } catch (error) {
+        return res.status(401).json({
+            message: "Invalid or expired refresh token."
+        });
+    }
+})
 
 export default auth
