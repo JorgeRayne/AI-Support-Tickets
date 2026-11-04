@@ -102,9 +102,37 @@ async function updateAgent(req, res) {
     }
 }
 
+async function updateStatus(req, res){
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if(!status){
+            return res.status(400).json({
+                success: false,
+                message: "Status is required",
+            });
+        }
+
+        const ticket = await ticketService.updateTicketStatus(id, status);
+
+        return res.status(200).json({
+            success: true,
+            message: "Agent assigned successfully",
+            data: ticket,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
 export default{
     getTickets,
     createTicket,
     getTicket,
-    updateAgent
+    updateAgent,
+    updateStatus
 }
