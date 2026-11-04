@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Tickets from "../models/ticket.model.js";
+import Ticket from "../models/ticket.model.js";
 
 
 async function getTickets() {
@@ -38,9 +39,17 @@ async function updateAgent(id, assignedAgent) {
     );
 }
 
+async function updateTicketStatus(id, status) {
+    return await Ticket.findByIdAndUpdate(id, 
+        { status: status },
+        { returnDocument: after, runValidators: true }
+    );
+}
+
 export default {
     getTickets,
     createTickets,
     getTicket,
-    updateAgent
+    updateAgent,
+    updateTicketStatus
 }

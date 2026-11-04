@@ -12,8 +12,6 @@ ticket.get('/:id' , authorize('view:ticket'), ticketController.getTicket);
 
 ticket.patch('/:id/assign', authorize('update:ticket'), ticketController.updateAgent)
 
-ticket.patch('/:id/status', (req, res) => {
-
-})
+ticket.patch('/:id/status', ticketController.updateStatus)
 
 export default ticket
