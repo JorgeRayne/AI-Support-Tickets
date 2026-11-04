@@ -1,20 +1,18 @@
-export const roles = {
-    customers: [
-        'view:ticket',
-        'create:ticket',
-        'update:ticket',
-        'delete:ticket',
-    ],
-    agent:[
-        'view:ticket',
-        'create:ticket',
-        'update:ticket',
-        'delete:ticket',
-    ],
-    admin:[
-        'view:ticket',
-        'create:ticket',
-        'update:ticket',
-        'delete:ticket',
-    ]
-}
+import { permissions } from "./permission";
+
+export const rolePermissions = {
+  customer: [
+    permissions.VIEW_TICKET,
+    permissions.CREATE_TICKET,
+    permissions.UPDATE_TICKET,
+    permissions.DELETE_TICKET,
+  ],
+
+  agent: [
+    permissions.VIEW_TICKET,
+    permissions.UPDATE_TICKET,
+    permissions.RESOLVE_TICKET,
+  ],
+
+  admin: Object.values(permissions),
+};
