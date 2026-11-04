@@ -13,7 +13,7 @@ export const generateTokens = (user) => {
         },
         process.env.JWT_SECRET_TOKEN,
         {
-            expiresIn: '2m',
+            expiresIn: '15m',
             algorithm: 'HS256'
         }
     );
