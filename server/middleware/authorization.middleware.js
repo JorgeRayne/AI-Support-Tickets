@@ -1,6 +1,6 @@
-import { roles } from "../config/roles";
+import { rolePermissions } from "../config/roles.js";
 
-export const  authorize = (permission) => {
+const authorize = (permission) => {
     return (req, res, next) => {
         const user = req.user;
 
@@ -10,7 +10,7 @@ export const  authorize = (permission) => {
             });
         }
 
-        const allowedPermissions = roles[user.role] || [];
+        const allowedPermissions = rolePermissions[user.role] || [];
 
         if (!allowedPermissions.includes(permission)) {
             return res.status(403).json({
@@ -20,3 +20,5 @@ export const  authorize = (permission) => {
         next();        
     }
 }
+
+export default authorize;
