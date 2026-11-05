@@ -39,11 +39,30 @@ async function updateAgent(id, assignedAgent) {
     );
 }
 
-async function updateTicketStatus(id, status) {
-    return await Ticket.findByIdAndUpdate(id, 
-        { status: status },
-        { returnDocument: after, runValidators: true }
-    );
+async function updateTicketStatus(id, status, user) {
+
+    const ticket = await Ticket.findById(id)
+
+    if(!ticket) {
+        throw new Error('Ticket not found');
+    }
+
+    if (user.role === 'customer') {
+        if(ticket.customer.toString() !== user._id.toString()) {
+            throw new Error('You cannot update this ticket.');
+        }
+    } else if (user.role === 'agent') {
+        if (ticket.assignedAgent.toString() !== user._id.toString()) {
+            throw new Error('You cannot update this ticket.');    
+        }
+    } else if (user.role !== 'admin') {
+        throw new Error('You cannot update this ticket.');
+    }
+
+    return await ticket.findByIdAndUpdate(id, status, {
+        returnDocument: 'after',
+        runValidators
+    })
 }
 
 export default {
