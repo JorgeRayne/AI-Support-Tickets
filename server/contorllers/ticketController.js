@@ -106,6 +106,14 @@ async function updateStatus(req, res){
     try {
         const { id } = req.params;
         const { status } = req.body;
+        const user = req.user;
+
+        if(!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Log in."
+            });
+        }
 
         if(!status){
             return res.status(400).json({
@@ -114,7 +122,7 @@ async function updateStatus(req, res){
             });
         }
 
-        const ticket = await ticketService.updateTicketStatus(id, status);
+        const ticket = await ticketService.updateTicketStatus(id, status, user);
 
         return res.status(200).json({
             success: true,
