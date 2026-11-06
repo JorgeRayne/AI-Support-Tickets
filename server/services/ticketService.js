@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Tickets from "../models/ticket.model.js";
 import Ticket from "../models/ticket.model.js";
+import canAccessTicket from "../utils/canAccessTictek.js";
 
 
 async function getTickets() {
@@ -47,21 +48,13 @@ async function updateTicketStatus(id, status, user) {
         throw new Error('Ticket not found');
     }
 
-    if (user.role === 'customer') {
-        if(ticket.customer.toString() !== user._id.toString()) {
-            throw new Error('You cannot update this ticket.');
-        }
-    } else if (user.role === 'agent') {
-        if (ticket.assignedAgent.toString() !== user._id.toString()) {
-            throw new Error('You cannot update this ticket.');    
-        }
-    } else if (user.role !== 'admin') {
-        throw new Error('You cannot update this ticket.');
+    if(!canAccessTicket(ticket, user)) {
+        throw new Error("You're not authoeize to update this ticket.");
     }
 
     return await ticket.findByIdAndUpdate(id, status, {
         returnDocument: 'after',
-        runValidators
+        runValidators: true,
     })
 }
 
