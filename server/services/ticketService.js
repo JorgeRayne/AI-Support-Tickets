@@ -12,18 +12,26 @@ async function getTickets() {
 }
 
 async function createTickets(body) {
-    const ticket = new Tickets(body);
+    const ticket = new Tickets({
+        subject: body.subject,
+        description: body.description,
+        category: body.category,
+        customer: user._id
+    });
 
-    ticket.save();
-    return ticket;
+    return await ticket.save();
 }
 
-async function getTicket(id) {
+async function getTicket(user, id) {
     try {
         const ticket = Tickets.findById(id);
 
         if(!ticket){
             throw new Error('Ticket Missing')
+        }
+
+        if (!canAccessTicket(ticket, user)) {
+            throw new Error("You are not authorized to view this ticket.");
         }
 
         return ticket;
@@ -52,10 +60,39 @@ async function updateTicketStatus(id, status, user) {
         throw new Error("You're not authoeize to update this ticket.");
     }
 
-    return await ticket.findByIdAndUpdate(id, status, {
-        returnDocument: 'after',
-        runValidators: true,
-    })
+    return await ticket.findByIdAndUpdate(id, 
+        {
+            $set: { status }
+        }, {
+            returnDocument: 'after',
+            runValidators: true,
+        }
+    )
+}
+
+async function updateTicket(ticket, user) {
+    
+    const ticket = await Ticket.findById(ticket.id);
+
+    if (!ticket) {
+        return null;
+    }
+
+    if(!canAccessTicket(ticket, user)){
+        throw new Error("You're not authoeize to update this ticket.")
+    };
+
+    return await Ticket.findByIdAndUpdate(ticket._id, 
+        {
+            subject: ticket.subject,
+            description: ticket.description,
+            category: ticket.category
+        },
+        {
+            returnDocument: 'after',
+            runValidators: true
+        }
+    );
 }
 
 export default {
@@ -63,5 +100,6 @@ export default {
     createTickets,
     getTicket,
     updateAgent,
-    updateTicketStatus
+    updateTicketStatus,
+    updateTicket
 }
