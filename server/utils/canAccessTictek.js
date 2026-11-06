@@ -4,11 +4,11 @@ export default function canAccessTicket(ticket, user) {
     }
 
     if (user.role === 'customer') {
-        return ticket.customer.toSting() === user._id.toSting()
+        return ticket.customer.toString() === user._id.toString()
     }
 
     if (user.role === 'agent') {
-        return ticket.assignAgent?.toSting() === user._id.toSting()
+        return ticket.assignAgent?.toString() === user._id.toString()
     }
 
     return false

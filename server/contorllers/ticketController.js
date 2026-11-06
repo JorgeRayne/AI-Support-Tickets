@@ -45,7 +45,7 @@ async function createTicket(req, res) {
 
 async function getTicket(req, res) {
     try {
-        const ticket = await ticketService.getTicket(req.params.id);
+        const ticket = await ticketService.getTicket(req.user, req.params.id,);
 
         if (!ticket) {
             return res.status(404).json({
@@ -66,41 +66,41 @@ async function getTicket(req, res) {
     }
 }
 
-async function updateAgent(req, res) {
-    const { id } = req.params;
-    const { assignedAgent } = req.body;
+// async function updateAgent(req, res) {
+//     const { id } = req.params;
+//     const { assignedAgent } = req.body;
 
-    if (!assignedAgent) {
-        return res.status(400).json({
-            success: false,
-            message: "assignedAgent is required",
-        });
-    }
+//     if (!assignedAgent) {
+//         return res.status(400).json({
+//             success: false,
+//             message: "assignedAgent is required",
+//         });
+//     }
 
-    try {
-        const ticket = await ticketService.updateAgent(id, assignedAgent);
+//     try {
+//         const ticket = await ticketService.updateAgent(id, assignedAgent);
 
-        if (!ticket) {
-            return res.status(404).json({
-                success: false,
-                message: "Ticket not found",
-            });
-        }
+//         if (!ticket) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Ticket not found",
+//             });
+//         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Agent assigned successfully",
-            data: ticket,
-        });
-    } catch (error) {
-        console.error("Error assigning agent:", error);
+//         return res.status(200).json({
+//             success: true,
+//             message: "Agent assigned successfully",
+//             data: ticket,
+//         });
+//     } catch (error) {
+//         console.error("Error assigning agent:", error);
 
-        return res.status(400).json({
-            success: false,
-            message: error.message,
-        });
-    }
-}
+//         return res.status(400).json({
+//             success: false,
+//             message: error.message,
+//         });
+//     }
+// }
 
 async function updateStatus(req, res){
     try {
@@ -137,10 +137,38 @@ async function updateStatus(req, res){
     }
 }
 
+async function updateTicket(req, res) {
+    try {
+        const {_id, subject, desctription, category, } = req.body;
+        const user = req.user;
+
+        const ticketBody = {
+            id: _id,
+            subject, 
+            desctription,
+            category,
+        }
+
+        const updateTicket = ticketService.updateTicket(ticketBody, user);
+
+        if(!updateTicket) {
+            return res.status(404).json({
+                message: "Ticket not Found."
+            });
+        }
+        
+    } catch (error) {
+        res.status(500).json({
+            message: "Server Error."
+        });
+    }
+}
+
 export default{
     getTickets,
     createTicket,
     getTicket,
     updateAgent,
-    updateStatus
+    updateStatus,
+    updateTicket
 }

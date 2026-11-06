@@ -10,7 +10,7 @@ ticket.get('/', authorize('view:ticket'), ticketController.getTickets);
 
 ticket.get('/:id' , authorize('view:ticket'), ticketController.getTicket);
 
-ticket.patch('/:id/assign', authorize('update:ticket'), ticketController.updateAgent)
+//ticket.patch('/:id/assign', authorize('update:ticket'), ticketController.updateAgent)
 
 ticket.patch('/:id/status', authorize('update:ticket'), ticketController.updateStatus)
 
