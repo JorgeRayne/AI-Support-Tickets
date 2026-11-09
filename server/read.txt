@@ -1,2 +1,4 @@
 code review for jwt auth(validate data ,make service and cotroller for auth)
 move permission and role on database
+fix message response
+fix endpoint naming
