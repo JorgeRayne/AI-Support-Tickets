@@ -2,42 +2,61 @@ import mongoose from "mongoose";
 import Tickets from "../models/ticket.model.js";
 import Ticket from "../models/ticket.model.js";
 import canAccessTicket from "../utils/canAccessTictek.js";
+import User from "../models/user.model.js";
 
 
-async function getTickets() {
-    console.log("Database:", mongoose.connection.name);
+async function getTickets(user) {
+    let filter = {}
 
-    const tickets = await Tickets.find();
+    if(user.role === 'customer') {
+        filter.customer = user.sub;
+    }
+
+    if(user.role === 'agent'){
+        filter.assignedAgent= user.sub
+    }
+
+    const tickets = await Ticket.find(filter)
+        .populate("customer", "name email")
+        .populate("assignedAgent", "name email")
+        .sort({ createdAt: -1 });
+
+    if(!tickets) {
+        return null;
+    }
+
     return tickets
 }
 
-async function createTickets(body) {
+async function createTickets(body, user) {
     const ticket = new Tickets({
         subject: body.subject,
         description: body.description,
         category: body.category,
-        customer: user._id
+        customer: user.sub
     });
 
     return await ticket.save();
 }
 
 async function getTicket(user, id) {
-    try {
-        const ticket = Tickets.findById(id);
+    const ticket = await Tickets.findById(id)
+        .populate("customer", "name email")
+        .populate("assignedAgent", "name email");
 
-        if(!ticket){
-            throw new Error('Ticket Missing')
-        }
-
-        if (!canAccessTicket(ticket, user)) {
-            throw new Error("You are not authorized to view this ticket.");
-        }
-
-        return ticket;
-    } catch (error) {
-        console.log(error)
+    if(!ticket){
+        throw new Error('Ticket Missing')
     }
+
+    const currentUser = {
+        id: user.sub
+    }
+
+    if (!canAccessTicket(ticket, currentUser)) {
+        throw new Error("You are not authorized to view this ticket.");
+    }
+
+    return ticket;
 }
 
 async function updateAgent(id, assignedAgent) {
@@ -56,11 +75,13 @@ async function updateTicketStatus(id, status, user) {
         throw new Error('Ticket not found');
     }
 
-    if(!canAccessTicket(ticket, user)) {
+    const currentUser = await User.findById(user.sub);
+
+    if(!canAccessTicket(ticket, currentUser)) {
         throw new Error("You're not authoeize to update this ticket.");
     }
 
-    return await ticket.findByIdAndUpdate(id, 
+    const updatedTicket = await Ticket.findByIdAndUpdate(id, 
         {
             $set: { status }
         }, {
@@ -68,17 +89,21 @@ async function updateTicketStatus(id, status, user) {
             runValidators: true,
         }
     )
+
+    return updatedTicket;
 }
 
 async function updateTicket(ticket, user) {
     
-    const ticket = await Ticket.findById(ticket.id);
+    const targetTikcet = await Ticket.findById(ticket.id);
 
-    if (!ticket) {
+    if (!targetTikcet) {
         return null;
     }
 
-    if(!canAccessTicket(ticket, user)){
+    const currentUser = await User.findById(user.sub);
+
+    if(!canAccessTicket(ticket, currentUser)){
         throw new Error("You're not authoeize to update this ticket.")
     };
 

@@ -2,7 +2,21 @@ import ticketService from '../services/ticketService.js';
 
 async function getTickets(req, res) {
     try {
-        const tickets = await ticketService.getTickets();
+        const user = req.user;
+
+        if(!user){
+            return res.status(404).json({
+                message: 'Please Login.'
+            });
+        }
+
+        const tickets = await ticketService.getTickets(user);
+
+        if(!tickets){
+            return res.status(403).json({
+                message: "Not Authorize."
+            });
+        }
 
         return res.status(200).json({
             success: true,
@@ -18,7 +32,7 @@ async function getTickets(req, res) {
 
 async function createTicket(req, res) {
     try {
-        const ticket = await ticketService.createTickets(req.body);
+        const ticket = await ticketService.createTickets(req.body, req.user);
 
         return res.status(201).json({
             message: 'New Ticket Added',
@@ -48,9 +62,9 @@ async function getTicket(req, res) {
         const ticket = await ticketService.getTicket(req.user, req.params.id,);
 
         if (!ticket) {
-            return res.status(404).json({
+            return res.status(203).json({
                 success: false,
-                message: "Ticket not found",
+                message: "Not Authorize.",
             });
         }
 
@@ -168,7 +182,7 @@ export default{
     getTickets,
     createTicket,
     getTicket,
-    updateAgent,
+    //updateAgent,
     updateStatus,
     updateTicket
 }
