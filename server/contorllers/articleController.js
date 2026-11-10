@@ -38,7 +38,25 @@ async function createArticle(req, res) {
 }
 
 async function getArticles(req, res) {
-    console.log('asdfasdf')
+    try {
+        const article = await articleService.getArticles();
+
+        if(article.length === 0 || !article) {
+            res.status(404).status({
+                message: "success",
+                article: "No article found."
+            })
+        }
+
+        res.status(200).json({
+            message: 'succes',
+            article: article
+        })
+    } catch (error) {
+        res.status(404).json({
+            message:"failde"
+        });
+    }
 }
 
 async function getArticle(req, res) {
