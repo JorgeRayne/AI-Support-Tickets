@@ -5,6 +5,7 @@ import ticket from './routes/ticket.js';
 import auth from './routes/auth.js'
 import authToken from './middleware/authToken.middleware.js';
 import cookieParser from 'cookie-parser';
+import article from './routes/article.js';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cookieParser());
 
 app.use('/api', auth);
 app.use('/api/tickets', authToken, ticket);
+app.use('/api/articles', authToken, article)
 
 const startServer = async () => {
     const PORT = process.env.PORT
