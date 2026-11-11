@@ -11,6 +11,7 @@ async function createArticle(body, user) {
     });
 
     await article.validate();
+    await article.save();
 
     return article;
 }
