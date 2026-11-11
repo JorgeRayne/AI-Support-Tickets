@@ -22,7 +22,15 @@ async function getArticles() {
     return article;
 };
 
+async function getArticle(id){
+    // const article = await KnowledgeArticle.findById(id);
+
+    // return article;
+    console.log(id);
+}
+
 export default{
     createArticle,
-    getArticles
+    getArticles,
+    getArticle
 }
