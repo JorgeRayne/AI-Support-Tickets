@@ -38,10 +38,59 @@ async function createArticle(req, res) {
 }
 
 async function getArticles(req, res) {
-    console.log('asdfasdf')
+    try {
+        const articles = await articleService.getArticles();
+
+        if(!articles || articles.length === 0) {
+            return res.status(404).status({
+                message: "false",
+                article: "No article found."
+            })
+        }
+
+        return res.status(200).json({
+            message: 'succes',
+            article: articles
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
 }
 
+// async function getArticles(req, res) {
+//     try {
+//         const articles = await articleService.getArticles();
+
+//         if (!articles || articles.length === 0) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "No articles found."
+//             });
+//         }
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Articles retrieved successfully.",
+//             data: articles
+//         });
+
+//     } catch (error) {
+//         console.error("Get articles error:", error);
+
+//         return res.status(500).json({
+//             success: false,
+//             message: "Internal server error."
+//         });
+//     }
+// }
+
 async function getArticle(req, res) {
+    const ticket = req.params
+
+    console.log(ticket)
     
 }
 

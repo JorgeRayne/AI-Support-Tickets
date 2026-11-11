@@ -6,6 +6,7 @@ import auth from './routes/auth.js'
 import authToken from './middleware/authToken.middleware.js';
 import cookieParser from 'cookie-parser';
 import article from './routes/article.js';
+import errorHandler from './middleware/error.middleware.js'
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(cookieParser());
 app.use('/api', auth);
 app.use('/api/tickets', authToken, ticket);
 app.use('/api/articles', authToken, article)
+
+app.use(errorHandler)
 
 const startServer = async () => {
     const PORT = process.env.PORT

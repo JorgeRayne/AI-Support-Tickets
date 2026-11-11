@@ -11,10 +11,18 @@ async function createArticle(body, user) {
     });
 
     await article.validate();
+    await article.save();
 
     return article;
 }
 
+async function getArticles() {
+    const article = await KnowledgeArticle.find();
+
+    return article;
+};
+
 export default{
     createArticle,
+    getArticles
 }
