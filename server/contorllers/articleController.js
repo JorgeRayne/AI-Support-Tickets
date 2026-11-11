@@ -60,38 +60,28 @@ async function getArticles(req, res) {
     }
 }
 
-// async function getArticles(req, res) {
-//     try {
-//         const articles = await articleService.getArticles();
-
-//         if (!articles || articles.length === 0) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "No articles found."
-//             });
-//         }
-
-//         return res.status(200).json({
-//             success: true,
-//             message: "Articles retrieved successfully.",
-//             data: articles
-//         });
-
-//     } catch (error) {
-//         console.error("Get articles error:", error);
-
-//         return res.status(500).json({
-//             success: false,
-//             message: "Internal server error."
-//         });
-//     }
-// }
-
 async function getArticle(req, res) {
-    const ticket = req.params
+    try {
+        const id = req.params;
+        const article = articleService.getArticle(id);
 
-    console.log(ticket)
-    
+        if(!article) {
+            return res.status(404).json({
+                success: true,
+                message: 'Article not found.'
+            });
+        }
+        return res.status(201).json({
+            success: true,
+            data: article
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
 }
 
 async function updateArticle(req, res) {
