@@ -62,8 +62,8 @@ async function getArticles(req, res) {
 
 async function getArticle(req, res) {
     try {
-        const id = req.params;
-        const article = articleService.getArticle(id);
+        const id = req.params.id;
+        const article = await articleService.getArticle(id);
 
         if(!article) {
             return res.status(404).json({
@@ -85,10 +85,30 @@ async function getArticle(req, res) {
 }
 
 async function updateArticle(req, res) {
-    
+    try {
+        const id = req.params.id;
+        const articleBody = {...req.body};
+
+        const updatedArticle = await articleService.updateArticle(id, articleBody)
+
+        return res.status(200).json({
+            success: true,
+            message: "Article updated successfully.",
+            data: updatedArticle
+        });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
 }
 
 async function deleteArtcile(req, res) {
+    const id = req.params.id;
+
     
 }
 

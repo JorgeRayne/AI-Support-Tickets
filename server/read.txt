@@ -4,3 +4,5 @@ fix message response
 fix endpoint naming
 
 add validation on Schema
+
+design services to handel request's status code/event properly
