@@ -23,14 +23,66 @@ async function getArticles() {
 };
 
 async function getArticle(id){
-    // const article = await KnowledgeArticle.findById(id);
+    const article = await KnowledgeArticle.findById(id);
 
-    // return article;
-    console.log(id);
+    return article;
+}
+
+async function updateArticle(id, body){
+
+    const toChangeArticle = await KnowledgeArticle.findById(id); 
+
+    if (!toChangeArticle) {
+        throw new Error("Article not found.");
+    }
+
+    const allowedFields = [
+        "title",
+        "content",
+        "tags",
+        "isPublished"
+    ]
+
+    const updates = {};
+
+    Object.keys(body).forEach(field => {
+        if(allowedFields.includes(field)) {
+            updates[field] = body[field]
+        }
+    });
+
+    if (Object.keys(updates).length === 0) {
+        throw new Error("No valid fields provided for update.");
+    }
+
+    const article = await KnowledgeArticle.findByIdAndUpdate(id,
+        {
+            $set: updates
+        },
+        {
+            returnDocument: 'after',
+            runValidators: true
+        }
+    )
+
+    return article;
+}
+
+async function deleteArtcile(id) {
+    const article = KnowledgeArticle.findById(id);
+
+    if (!article) {
+        throw new Error("Article not found.");
+    }
+
+    const articleToDelete = KnowledgeArticle.findByIdAndDelete()
+
 }
 
 export default{
     createArticle,
     getArticles,
-    getArticle
+    getArticle,
+    updateArticle,
+    deleteArtcile,
 }
