@@ -106,10 +106,20 @@ async function updateArticle(req, res) {
     }
 }
 
-async function deleteArtcile(req, res) {
-    const id = req.params.id;
+async function deleteArticle(req, res, next) {
+    try {
+        const id = req.params.id;
 
-    
+        const deletedArticle = await articleService.deleteArtcile(id);
+
+        return res.status(200).json({
+            success: true,
+            message: "Article deleted successfully.",
+            data: deletedArticle,
+        });
+    } catch (error) {
+        next(error);
+    }
 }
 
 async function searchArticle(req, res) {
@@ -121,6 +131,6 @@ export {
     getArticles,
     getArticle,
     updateArticle,
-    deleteArtcile,
+    deleteArticle,
     searchArticle,
 }

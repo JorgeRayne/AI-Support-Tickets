@@ -69,14 +69,15 @@ async function updateArticle(id, body){
 }
 
 async function deleteArtcile(id) {
-    const article = KnowledgeArticle.findById(id);
+    const articleToDelete = await KnowledgeArticle.findByIdAndDelete(id)
 
-    if (!article) {
-        throw new Error("Article not found.");
+    if (!articleToDelete) {
+        const error = new Error("Article not found.");
+        error.statusCode = 404;
+        throw error;
     }
 
-    const articleToDelete = KnowledgeArticle.findByIdAndDelete()
-
+    return articleToDelete;          
 }
 
 export default{
