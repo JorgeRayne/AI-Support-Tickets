@@ -5,4 +5,5 @@ fix endpoint naming
 
 add validation on Schema
 
-design services to handel request's status code/event properly
+design services to handel request's status code/event properly.
+RETURN ONLY NEED DATA FOR EACH request
