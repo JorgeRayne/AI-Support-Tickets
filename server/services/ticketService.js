@@ -1,19 +1,28 @@
-import mongoose from "mongoose";
 import Tickets from "../models/ticket.model.js";
 import Ticket from "../models/ticket.model.js";
 import canAccessTicket from "../utils/canAccessTictek.js";
-import User from "../models/user.model.js";
-
 
 async function getTickets(user) {
-    let filter = {}
+    let filter;
 
-    if(user.role === 'customer') {
-        filter.customer = user.sub;
-    }
+    switch (user.role) {
+        case 'customer':
+            filter = { customer: user.sub };
+            break;
 
-    if(user.role === 'agent'){
-        filter.assignedAgent= user.sub
+        case 'agent':
+            filter = { assignedAgent: user.sub };
+            break;
+
+        case 'admin':
+            filter = {};
+            break;
+
+        default: {
+            const error = new Error('Invalid user role.');
+            error.statusCode = 403;
+            throw error;
+        }
     }
 
     const tickets = await Ticket.find(filter)
@@ -21,22 +30,29 @@ async function getTickets(user) {
         .populate("assignedAgent", "name email")
         .sort({ createdAt: -1 });
 
-    if(!tickets) {
-        return null;
-    }
-
     return tickets
 }
 
 async function createTickets(body, user) {
-    const ticket = new Tickets({
-        subject: body.subject,
-        description: body.description,
-        category: body.category,
-        customer: user.sub
-    });
+    try {
+        const ticket = new Ticket({
+            subject: body.subject,
+            description: body.description,
+            category: body.category,
+            customer: user.sub
+        });
 
-    return await ticket.save();
+        return await ticket.save();
+
+    } catch (error) {
+        if (error.code === 11000) {
+            const err = new Error('Ticket already exists.');
+            err.statusCode = 409;
+            throw err;
+        }
+
+        throw error;
+    }
 }
 
 async function getTicket(user, id) {
@@ -45,26 +61,23 @@ async function getTicket(user, id) {
         .populate("assignedAgent", "name email");
 
     if(!ticket){
-        throw new Error('Ticket Missing')
+        const error = new Error('Ticket doest exist');
+        error.statusCode = 404;
+        throw error;
     }
 
     const currentUser = {
-        id: user.sub
+        id: user.sub,
+        role: user.role
     }
 
     if (!canAccessTicket(ticket, currentUser)) {
-        throw new Error("You are not authorized to view this ticket.");
+        const error = new Error("You are not authorized to view this ticket.");
+        error.statusCode = 401;
+        throw error;
     }
 
     return ticket;
-}
-
-async function updateAgent(id, assignedAgent) {
-    return await Tickets.findByIdAndUpdate(
-        id,
-        { assignedAgent: assignedAgent },
-        { new: true, runValidators: true }
-    );
 }
 
 async function updateTicketStatus(id, status, user) {
@@ -72,13 +85,20 @@ async function updateTicketStatus(id, status, user) {
     const ticket = await Ticket.findById(id)
 
     if(!ticket) {
-        throw new Error('Ticket not found');
+        const error = new Error('Ticket doest exist');
+        error.statusCode = 404;
+        throw error;
     }
 
-    const currentUser = await User.findById(user.sub);
+    const currentUser = {
+        _id: user.sub,
+        role: user.role
+    }
 
     if(!canAccessTicket(ticket, currentUser)) {
-        throw new Error("You're not authoeize to update this ticket.");
+        const error = new Error("You are not authorized to view this ticket.");
+        error.statusCode = 401;
+        throw error;
     }
 
     const updatedTicket = await Ticket.findByIdAndUpdate(id, 
@@ -97,16 +117,23 @@ async function updateTicket(ticket, user) {
     
     const targetTikcet = await Ticket.findById(ticket.id);
 
-    if (!targetTikcet) {
-        return null;
+    if(!targetTikcet) {
+        const error = new Error('Ticket doest exist');
+        error.statusCode = 404;
+        throw error;
     }
 
-    const currentUser = await User.findById(user.sub);
+    const currentUser = {
+        _id: user.sub,
+        role: user.role
+    }
 
-    if(!canAccessTicket(ticket, currentUser)){
-        throw new Error("You're not authoeize to update this ticket.")
+    if(!canAccessTicket(targetTikcet, currentUser)){
+        const error = new Error("You are not authorized to view this ticket.");
+        error.statusCode = 401;
+        throw error;
     };
-
+    //add validation each field
     return await Ticket.findByIdAndUpdate(ticket._id, 
         {
             subject: ticket.subject,
@@ -124,7 +151,6 @@ export default {
     getTickets,
     createTickets,
     getTicket,
-    updateAgent,
     updateTicketStatus,
     updateTicket
 }

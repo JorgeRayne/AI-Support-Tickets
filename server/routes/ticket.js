@@ -1,17 +1,16 @@
 import express from 'express';
 import ticketController from '../contorllers/ticketController.js';
 import authorize from '../middleware/authorization.middleware.js'
+import authToken from '../middleware/authToken.middleware.js';
 
 const ticket = express.Router();
 
-ticket.post('/', authorize('create:ticket'), ticketController.createTicket);
+ticket.post('/', authToken, authorize('create:ticket'), ticketController.createTicket);
 
-ticket.get('/', authorize('view:ticket'), ticketController.getTickets);
+ticket.get('/', authToken, authorize('view:ticket'), ticketController.getTickets);
 
-ticket.get('/:id' , authorize('view:ticket'), ticketController.getTicket);
+ticket.get('/:id' , authToken, authorize('view:ticket'), ticketController.getTicket);
 
-//ticket.patch('/:id/assign', authorize('update:ticket'), ticketController.updateAgent)
-
-ticket.patch('/:id/status', authorize('update:ticket'), ticketController.updateStatus)
+ticket.patch('/:id/status', authToken, authorize('update:ticket'), ticketController.updateStatus)
 
 export default ticket
