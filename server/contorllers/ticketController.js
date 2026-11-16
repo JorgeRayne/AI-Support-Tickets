@@ -1,180 +1,93 @@
 import ticketService from '../services/ticketService.js';
 
-async function getTickets(req, res) {
+async function getTickets(req, res, next) {
     try {
         const user = req.user;
 
-        if(!user){
-            return res.status(404).json({
-                message: 'Please Login.'
-            });
-        }
-
         const tickets = await ticketService.getTickets(user);
-
-        if(!tickets){
-            return res.status(403).json({
-                message: "Not Authorize."
-            });
-        }
 
         return res.status(200).json({
             success: true,
             data: tickets,
         });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch tickets",
-        });
+        next(error)
     }
 }
 
-async function createTicket(req, res) {
+async function createTicket(req, res, next) {
     try {
         const ticket = await ticketService.createTickets(req.body, req.user);
 
         return res.status(201).json({
-            message: 'New Ticket Added',
+            message: 'Ticket created successfully.',
             data: ticket,
         });
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(409).json({
-                message: "Email already exists",
-            });
-        }
-
-        if (error.name === "ValidationError" || error.name === "CastError") {
-            return res.status(400).json({
-                message: error.message,
-            });
-        }
-
-        return res.status(500).json({
-            message: "Internal server error",
-        });
+        next(error)
     }
 }
 
-async function getTicket(req, res) {
+async function getTicket(req, res, next) {
     try {
-        const ticket = await ticketService.getTicket(req.user, req.params.id,);
-
-        if (!ticket) {
-            return res.status(203).json({
-                success: false,
-                message: "Not Authorize.",
-            });
-        }
+        const ticket = await ticketService.getTicket(req.user, req.params.id);
 
         return res.status(200).json({
             success: true,
             data: ticket,
         });
     } catch (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        next(error);
     }
 }
 
-// async function updateAgent(req, res) {
-//     const { id } = req.params;
-//     const { assignedAgent } = req.body;
 
-//     if (!assignedAgent) {
-//         return res.status(400).json({
-//             success: false,
-//             message: "assignedAgent is required",
-//         });
-//     }
-
-//     try {
-//         const ticket = await ticketService.updateAgent(id, assignedAgent);
-
-//         if (!ticket) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Ticket not found",
-//             });
-//         }
-
-//         return res.status(200).json({
-//             success: true,
-//             message: "Agent assigned successfully",
-//             data: ticket,
-//         });
-//     } catch (error) {
-//         console.error("Error assigning agent:", error);
-
-//         return res.status(400).json({
-//             success: false,
-//             message: error.message,
-//         });
-//     }
-// }
-
-async function updateStatus(req, res){
+async function updateStatus(req, res, next){
     try {
         const { id } = req.params;
         const { status } = req.body;
         const user = req.user;
 
-        if(!user) {
-            return res.status(400).json({
-                success: false,
-                message: "Please Log in."
-            });
-        }
-
         if(!status){
-            return res.status(400).json({
-                success: false,
-                message: "Status is required",
-            });
+            const error = new Error("Status is required");
+            error.statusCode = 400;
+            throw error;
         }
 
         const ticket = await ticketService.updateTicketStatus(id, status, user);
 
         return res.status(200).json({
             success: true,
-            message: "Agent assigned successfully",
+            message: "Ticket status updated successfully.",
             data: ticket,
         });
     } catch (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        next(error);
     }
 }
 
-async function updateTicket(req, res) {
+async function updateTicket(req, res, next) {
     try {
-        const {_id, subject, desctription, category, } = req.body;
+        const {subject, description, category, } = req.body;
+        const id = req.params.id
         const user = req.user;
 
         const ticketBody = {
-            id: _id,
+            id: id,
             subject, 
-            desctription,
+            description,
             category,
         }
 
-        const updateTicket = ticketService.updateTicket(ticketBody, user);
-
-        if(!updateTicket) {
-            return res.status(404).json({
-                message: "Ticket not Found."
-            });
-        }
+        const updateTicket = await ticketService.updateTicket(ticketBody, user);
+        return res.status(200).json({
+            success: true,
+            message: "Ticket update successfully.",
+            data: updateTicket,
+        });
         
     } catch (error) {
-        res.status(500).json({
-            message: "Server Error."
-        });
+        next(error);
     }
 }
 

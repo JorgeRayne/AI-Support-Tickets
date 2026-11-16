@@ -6,7 +6,12 @@ export default async function authToken(req, res, next) {
     const authHeader = req.headers
     const authToken = authHeader?.authorization && authHeader.authorization.split(" ")[1];
 
-    if(!authToken) return res.status(401).json({ message: "Access token is required." });
+    if(!authToken) {
+        const error = "Access token is required.";
+        error.statusCode = 401;
+
+        return next(error);
+    };
 
     try {
         const decoded = jwt.verify(
@@ -18,9 +23,9 @@ export default async function authToken(req, res, next) {
         );
 
         if (!decoded.jti) {
-            return res.status(401).json({
-                message: "Invalid token.",
-            });
+            const error = "Invalid token."
+            error.statusCode = 401 
+            return next(error);
         }
 
         const revoked = await RevokedToken.findOne({
@@ -28,25 +33,22 @@ export default async function authToken(req, res, next) {
         });
 
         if (revoked) {
-            return res.status(401).json({
-                message: "Token has been revoked. Please log in again.",
-            });
+            const error = "Token has been revoked. Please log in again."
+            error.statusCode = 401 
+            return next(error);
         }
 
         req.user = decoded;
         next();
     } catch (error) {
-        if (error.name === "JsonWebTokenError" ||
-            error.name === "TokenExpiredError") {
-            return res.status(401).json({
-                message: "Invalid or expired access token.",
-            });
+        if (
+            error.name === 'JsonWebTokenError' ||
+            error.name === 'TokenExpiredError' ||
+            error.name === 'NotBeforeError'
+        ) {
+            error.statusCode = 401;
         }
 
-        console.error("Authentication error:", error);
-
-        return res.status(500).json({
-            message: "Authentication failed.",
-        });
+        return next(error);
     }
 }
