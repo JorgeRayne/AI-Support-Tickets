@@ -5,19 +5,21 @@ const authorize = (permission) => {
         const user = req.user;
 
         if (!user) {
-            return res.status(401).json({
-                message: 'Unauthorized'
-            });
+            const error = new Error('Unauthenticated, Please Login or Signup.');
+            error.statusCode = 401;
+
+            return next(error);
         }
 
         const allowedPermissions = rolePermissions[user.role] || [];
 
         if (!allowedPermissions.includes(permission)) {
-            return res.status(403).json({
-                message: 'You do not have permission to perform this action.',
-            });
+            const error = new Error('Unauthorized, You do not have permission to perform this action.');
+            error.statusCode = 401;
+
+            return next(error);
         }
-        next();        
+        return next();        
     }
 }
 
