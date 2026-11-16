@@ -80,10 +80,22 @@ async function deleteArtcile(id) {
     return articleToDelete;          
 }
 
+async function searchArticle(params){
+    const article = await KnowledgeArticle.find({
+        title : {
+            $regex: params,
+            $options:'i',
+        }
+    })
+
+    return article
+}
+
 export default{
     createArticle,
     getArticles,
     getArticle,
     updateArticle,
     deleteArtcile,
+    searchArticle,
 }

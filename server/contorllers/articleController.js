@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import articleService from "../services/articleService.js"
+import KnowledgeArticle from "../models/knowledgeArticle.model.js";
 
 async function createArticle(req, res) {
     const articleBody = {...req.body}
@@ -123,7 +124,13 @@ async function deleteArticle(req, res, next) {
 }
 
 async function searchArticle(req, res) {
-    
+    const search = req.query.search;
+
+    const article = await KnowledgeArticle.searchArticle(search);
+
+    return res.status(200).json(
+        {artile:article}
+    );
 }
 
 export {
