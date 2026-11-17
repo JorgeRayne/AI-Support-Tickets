@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import 'dotenv/config';
 
 export const generateTokens = (user) => {
-
     const accessToken = jwt.sign(
         {
             sub: user._id,

@@ -3,13 +3,17 @@ import User from "../models/user.model.js";
 
 
 async function createUser(user) {
-    const newUser = new User({
-        username: user.username,
-        email:user.email,
-        passwordHash: user.passwordHash
-    })
-    await newUser.save();
-    return newUser;
+    try {
+        const newUser = new User({
+            username: user.username,
+            email:user.email,
+            passwordHash: user.passwordHash
+        });
+        await newUser.save();
+        return newUser;
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function getUser(query, withPass = false) {
