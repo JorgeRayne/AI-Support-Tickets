@@ -4,7 +4,7 @@ import { generateTokens } from "../utils/generateTokens.js";
 import jwt from 'jsonwebtoken';
 
 
-async function registerUser(req, res){
+async function registerUser(req, res, next){
     try {
         const { username, email, password } = req.body;
 
@@ -16,15 +16,17 @@ async function registerUser(req, res){
             !email.trim() ||
             !password
         ) {
-            return res.status(400).json({
-                message: "Name, email, and password are required.",
-        });
+            const error = "Name, email, and password are required.";
+            error.statusCode = 400;
+
+            throw error;
         }
 
         if(password.length < 8 || password.length > 72){
-            return res.status(400).json({
-                message: "Password must be between 8 and 72 characters."
-            }); 
+            const error = "Password must be between 8 and 72 characters.";
+            error.statusCode = 400;
+
+            throw error;
         }
 
         const normalizeEmail = email.trim().toLocaleLowerCase();
@@ -32,9 +34,10 @@ async function registerUser(req, res){
         const existingUser = await getUser({email:normalizeEmail})
 
         if (existingUser){
-            return res.status(400).json({
-                message:"An account with this email already exists.",
-            }); 
+            const error = "Password must be between 8 and 72 characters.";
+            error.statusCode = 400;
+
+            throw error;
         }
         
         const salt = await bcrypt.genSalt(10);
@@ -58,23 +61,24 @@ async function registerUser(req, res){
         },
         });
     } catch (error) {
-        console.error(error)
-        if (error.code === 11000) {
-        return res.status(409).json({
-            message: "An account with this email already exists.",
-            error: error
-        });
-        }
+        return next(error);
+        // console.error(error)
+        // if (error.code === 11000) {
+        // return res.status(409).json({
+        //     message: "An account with this email already exists.",
+        //     error: error
+        // });
+        // }
 
-        console.error("Registration error:", error);
+        // console.error("Registration error:", error);
 
-        return res.status(500).json({
-        message: "An unexpected error occurred.",
-        });       
+        // return res.status(500).json({
+        // message: "An unexpected error occurred.",
+        // });       
     }
 }
 
-async function loginUser(req, res){
+async function loginUser(req, res, next ){
     try {
         const {email, password} = req.body;
 
@@ -84,27 +88,36 @@ async function loginUser(req, res){
             !email.trim() ||
             !password
         ) {
-            return res.status(400).json({
-                message: "Email and password are required.",
-        });
+            const error = "Email and password are required.";
+            error.statusCode = 400;
+
+            throw error;
         }
 
         const user = await getUser({email: email.trim().toLowerCase()}, true)
-        if(!user) return res.status(401).json({
-            message: "User not Found",
-        });
+        if(!user) {
+            const error = "User not Found";
+            error.statusCode = 401;
+
+            throw error;
+        };
 
         const isMatch = await bcrypt.compare(
-            password,
+            password, 
             user.passwordHash
         );
 
-        if (!isMatch) return res.status(401).json({
-            message: "Invalid Email or Password"
-        })
+        if (!isMatch) {
+            const error = "Invalid Email or Password.";
+            error.statusCode = 400;
+
+            throw error;
+        }
 
         if (!process.env.JWT_SECRET_TOKEN) {
-            throw new Error("JWT_SECRET_TOKEN is not configured.");
+            const error = "JWT_SECRET_TOKEN is not configured.";
+
+            throw error;
         }
 
         const tokes = generateTokens(user)
@@ -130,35 +143,40 @@ async function loginUser(req, res){
             }
         });
     } catch (error) {
-        console.error("Login error:", error);
-
-        return res.status(500).json({
-            message: "An unexpected error occurred."
-        });        
+        next(error)
     }
 }
 
-async function getCurrentUser(req, res) {
-    const id = req.user.sub;
-    console.log(id)
-    if(!id) return res.status(404).json({
-        message: "User not found" 
-    });
+async function getCurrentUser(req, res, next) {
+    try {
+        const id = req.user.sub;
 
-    const user = await getUser({_id:id})
-    console.log(user)
+        if(!id) {
+            const error = "Please Login.";
+            error.statusCode = 400;
 
-    if (!user) return res.status(404).json({
-        message: 'No user Found'
-    });
+            throw error;
+        };
 
-    return res.status(200).json({
-        message: "success",
-        user:user
-    });
+        const user = await getUser({_id:id});
+
+        if (!user) {
+            const error = "User not Found, Please Login or Register";
+            error.statusCode = 404;
+
+            throw error;
+        };
+
+        return res.status(200).json({
+            message: "success",
+            user:user
+        });
+    } catch(error) {
+        next(error)
+    }
 }
 
-async function logoutUser(req, res) {
+async function logoutUser(req, res, next) {
     try {
         const { jti, exp } = req.user;
 
@@ -170,23 +188,19 @@ async function logoutUser(req, res) {
         });
 
     } catch (error) {
-        console.error("Logout error:", error);
-
-        return res.status(500).json({
-            success: false,
-            message: "Failed to logout.",
-        });
+        next(error)
     }
 }
 
-async function refreshUserToken(req, res) {
+async function refreshUserToken(req, res, error) {
     try {
         const refreshToken = req.cookies.refreshToken;
 
         if(!refreshToken) {
-            return res.status(401).json({
-                message: "Refresh token missing."
-            });
+            const error = "Refresh token missing."
+            error.statusCode = 401;
+
+            throw error;
         }
 
         const decoded = jwt.verify(
@@ -197,18 +211,17 @@ async function refreshUserToken(req, res) {
         const user = await getUser({_id: decoded.sub})
 
         if (!user) {
-            return res.status(401).json({
-                message: "User not found."
-            });
+            const error = "User not found."
+            error.statusCode = 401;
+
+            throw error;
         }
         const newToken = generateTokens(user);
         return res.status(200).json({
             token: newToken.accessToken
         });      
     } catch (error) {
-        return res.status(401).json({
-            message: "Invalid or expired refresh token."
-        });
+        next(error);
     }
 }
 
