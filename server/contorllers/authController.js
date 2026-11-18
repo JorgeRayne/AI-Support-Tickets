@@ -96,7 +96,7 @@ async function loginUser(req, res, next ){
 
         if (!isMatch) {
             const error = new Error("Invalid Email or Password.");
-            error.statusCode = 400;
+            error.statusCode = 401;
 
             throw error;
         }
@@ -136,6 +136,12 @@ async function loginUser(req, res, next ){
 
 async function getCurrentUser(req, res, next) {
     try {
+        if (!req.user?.sub) {
+            const error = new Error('Please log in.');
+            error.statusCode = 401;
+            throw error;
+        }
+
         const id = req.user.sub;
 
         if(!id) {
@@ -167,6 +173,12 @@ async function logoutUser(req, res, next) {
     try {
         const { jti, exp } = req.user;
 
+        if (!jti || !exp) {
+            const error = new Error('Invalid access token.');
+            error.statusCode = 401;
+            throw error;
+        }
+
         await logoutCurrentUser(jti, exp)
 
         return res.status(200).json({
@@ -179,7 +191,7 @@ async function logoutUser(req, res, next) {
     }
 }
 
-async function refreshUserToken(req, res, error) {
+async function refreshUserToken(req, res, next) {
     try {
         const refreshToken = req.cookies.refreshToken;
 
