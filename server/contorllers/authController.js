@@ -16,14 +16,14 @@ async function registerUser(req, res, next){
             !email.trim() ||
             !password
         ) {
-            const error = "Name, email, and password are required.";
+            const error = new Error("Name, email, and password are required.");
             error.statusCode = 400;
 
             throw error;
         }
 
         if(password.length < 8 || password.length > 72){
-            const error = "Password must be between 8 and 72 characters.";
+            const error = new Error("Password must be between 8 and 72 characters.");
             error.statusCode = 400;
 
             throw error;
@@ -34,7 +34,7 @@ async function registerUser(req, res, next){
         const existingUser = await getUser({email:normalizeEmail})
 
         if (existingUser){
-            const error = "Password must be between 8 and 72 characters.";
+            const error = new Error("An account with this email already exists.");
             error.statusCode = 400;
 
             throw error;
@@ -61,20 +61,7 @@ async function registerUser(req, res, next){
         },
         });
     } catch (error) {
-        return next(error);
-        // console.error(error)
-        // if (error.code === 11000) {
-        // return res.status(409).json({
-        //     message: "An account with this email already exists.",
-        //     error: error
-        // });
-        // }
-
-        // console.error("Registration error:", error);
-
-        // return res.status(500).json({
-        // message: "An unexpected error occurred.",
-        // });       
+        return next(error);      
     }
 }
 
@@ -88,7 +75,7 @@ async function loginUser(req, res, next ){
             !email.trim() ||
             !password
         ) {
-            const error = "Email and password are required.";
+            const error = new Error("Email and password are required.");
             error.statusCode = 400;
 
             throw error;
@@ -96,7 +83,7 @@ async function loginUser(req, res, next ){
 
         const user = await getUser({email: email.trim().toLowerCase()}, true)
         if(!user) {
-            const error = "User not Found";
+            const error = new Error("User not Found");
             error.statusCode = 401;
 
             throw error;
@@ -108,14 +95,14 @@ async function loginUser(req, res, next ){
         );
 
         if (!isMatch) {
-            const error = "Invalid Email or Password.";
+            const error = new Error("Invalid Email or Password.");
             error.statusCode = 400;
 
             throw error;
         }
 
         if (!process.env.JWT_SECRET_TOKEN) {
-            const error = "JWT_SECRET_TOKEN is not configured.";
+            const error = new Error("JWT_SECRET_TOKEN is not configured.");
 
             throw error;
         }
@@ -152,7 +139,7 @@ async function getCurrentUser(req, res, next) {
         const id = req.user.sub;
 
         if(!id) {
-            const error = "Please Login.";
+            const error = new Error("Please Login.");
             error.statusCode = 400;
 
             throw error;
@@ -161,7 +148,7 @@ async function getCurrentUser(req, res, next) {
         const user = await getUser({_id:id});
 
         if (!user) {
-            const error = "User not Found, Please Login or Register";
+            const error = new Error("User not Found, Please Login or Register");
             error.statusCode = 404;
 
             throw error;
@@ -197,7 +184,7 @@ async function refreshUserToken(req, res, error) {
         const refreshToken = req.cookies.refreshToken;
 
         if(!refreshToken) {
-            const error = "Refresh token missing."
+            const error = new Error("Refresh token missing.");
             error.statusCode = 401;
 
             throw error;
@@ -211,7 +198,7 @@ async function refreshUserToken(req, res, error) {
         const user = await getUser({_id: decoded.sub})
 
         if (!user) {
-            const error = "User not found."
+            const error = new Error("User not found.");
             error.statusCode = 401;
 
             throw error;
