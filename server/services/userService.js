@@ -12,6 +12,13 @@ async function createUser(user) {
         await newUser.save();
         return newUser;
     } catch (error) {
+        if (error.code === 11000) {
+            const duplicateError = new Error('An account with this email already exists.');
+
+            duplicateError.statusCode = 409;
+            throw duplicateError;
+        }
+
         throw error;
     }
 }
