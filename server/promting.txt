@@ -42,4 +42,4 @@ Follow the specified data types.
 Use null when a value is unknown and the schema permits it.
 Do not invent missing information.
 Ensure all strings use valid JSON escaping.
-Ensure the final output can be parsed by a standard JSON parser.
+Ensure the final output can be parsed by a standard JSON parser. 
