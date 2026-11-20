@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@google/genai": "^3.6.1",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^18.0.9",
@@ -13,7 +14,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server"
+    "start": "nodemon server",
+    "test": "node test/testAi.js"
   },
   "keywords": [],
   "author": "",
