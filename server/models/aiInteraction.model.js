@@ -2,37 +2,84 @@
 import mongoose from "mongoose";
 
 const aiInteractionSchema = new mongoose.Schema(
-  {
-    ticket: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Ticket",
-      required: true,
-    },
+    {
+        ticket: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Ticket",
+            required: true
+        },
 
-    modelOutput: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
-    },
+        requestedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
 
-    agentFeedback: {
-      type: String,
-      enum: ["accepted", "edited", "rejected"],
-      default: null,
-    },
+        provider: {
+            type: String,
+            default: "gemini"
+        },
 
-    feedbackComment: {
-      type: String,
-      default: "",
+        model: {
+            type: String,
+            required: true
+        },
+
+        analysis: {
+            category: {
+                type: String,
+                enum: [
+                    "account_access",
+                    "billing",
+                    "technical_issue",
+                    "bug_report",
+                    "other"
+                ],
+                required: true
+            },
+
+            suggestedPriority: {
+                type: String,
+                enum: ["low", "medium", "high", "urgent"],
+                required: true
+            },
+
+            summary: {
+                type: String,
+                required: true
+            },
+
+            reasoning: {
+                type: String,
+                required: true
+            }
+        },
+
+        feedback: {
+            status: {
+                type: String,
+                enum: ["pending", "accepted", "edited", "rejected"],
+                default: "pending"
+            },
+
+            comment: {
+                type: String,
+                default: ""
+            },
+
+            reviewedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                default: null
+            }
+        }
     },
-  },
-  {
-    timestamps: true,
-  }
+    { timestamps: true }
 );
 
 const AIInteraction = mongoose.model(
-  "AIInteraction",
-  aiInteractionSchema
+    "AIInteraction",
+    aiInteractionSchema
 );
 
 export default AIInteraction;

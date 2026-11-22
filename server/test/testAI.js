@@ -9,7 +9,7 @@ async function aiTest() {
     try {
         const result = await ticketAnalysis.analyzeTicket(dummyTicket);
         console.log("AI ANALYSIS RESULT:");
-        console.log(result);
+        console.log(result); 
     } catch (error) {
         console.error("AI ERROR:", error);
     }
