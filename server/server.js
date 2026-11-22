@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use('/api', auth);
 app.use('/api/tickets', authToken, ticket);
 app.use('/api/articles', authToken, article)
-app.use('/api/ai/ticket', ai);
+app.use('/api/ai/ticket', authToken, ai);
 
 app.use(errorHandler)
 
