@@ -27,7 +27,19 @@ async function analyzeTicket(ticket) {
         contents: prompt,
     });
 
-    return response.text;
+    let analysis;
+
+    try {
+        analysis = JSON.parse(response.text);
+    } catch (error) {
+        const parseError = new Error(
+            'AI returned an invalid JSON response.'
+        );
+        parseError.statusCode = 502;
+        throw parseError;
+    }
+
+    return analysis;
 }
 
 export default {analyzeTicket};
