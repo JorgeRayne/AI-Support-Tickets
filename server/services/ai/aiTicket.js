@@ -21,8 +21,6 @@ async function createAnalysisTicket(ticketId, user) {
 
     const ticket = await ticketService.getTicket(user, ticketId);
 
-    console.log(ticket)
-
     if(!ticket){
         const error = new Error("Ticket not found.");
         error.statusCode = 404;
@@ -31,8 +29,6 @@ async function createAnalysisTicket(ticketId, user) {
     }
 
     const aiResponse = await ticketAnalysisService.analyzeTicket(ticket);
-
-    console.log(aiResponse)
 
     const response = await AIInteraction.create({
         ticket: ticket._id,
@@ -46,13 +42,16 @@ async function createAnalysisTicket(ticketId, user) {
             reasoning: aiResponse.reasoning
         },
     });
-    console.log(response);
 
-
-    // return response;
+    return response;
 
 }
 
+async function getAnalysisTicket(id) {
+    return await AIInteraction.findById(id);
+}
+
 export default {
-    createAnalysisTicket
+    createAnalysisTicket,
+    getAnalysisTicket,
 };
