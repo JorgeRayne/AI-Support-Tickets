@@ -8,3 +8,10 @@ add validation on Schema
 design services to handel request's status code/event properly.
 RETURN ONLY NEED DATA FOR EACH request
 check for creation of duplicate tickets
+
+add rate limit
+User	    Ticket	                Expected result
+Agent A	    Assigned to Agent A	    Allowed
+Agent A	    Assigned to Agent B 	Denied
+Admin	    Any ticket	            Allowed
+Customer	Any ticket	            Denied
