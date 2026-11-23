@@ -36,7 +36,7 @@ async function analyzeTicket(ticket) {
             'AI returned an invalid JSON response.'
         );
         parseError.statusCode = 502;
-        throw parseError;
+        throw parseError;  
     }
 
     return analysis;
