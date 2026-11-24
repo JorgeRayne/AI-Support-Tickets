@@ -51,7 +51,23 @@ async function getAnalysisTicket(id) {
     return await AIInteraction.findById(id);
 }
 
+async function updateSuggestedResponse(id, response){
+    const aiTicket = await AIInteraction.findByIdAndUpdate( 
+        id,
+        {
+            suggestedResponse: response
+        },
+        {
+            returnDocument: 'after',
+            runValidators: true
+        }
+    );
+
+    return aiTicket; 
+}
+
 export default {
     createAnalysisTicket,
     getAnalysisTicket,
+    updateSuggestedResponse
 };
