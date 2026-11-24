@@ -55,6 +55,11 @@ const aiInteractionSchema = new mongoose.Schema(
             }
         },
 
+        suggestedResponse: {
+            type: String,
+            default: null
+        },
+
         feedback: {
             status: {
                 type: String,
