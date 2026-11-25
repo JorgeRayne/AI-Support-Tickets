@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import ticketService from "../ticketService.js";
 import AIInteraction from "../../models/aiInteraction.model.js";
 import ticketAnalysisService from "./ticketAnalysisService.js";
+import generateResponse from "./responseGeneration.js";
 
 async function createAnalysisTicket(ticketId, user) {
     if(!mongoose.Types.ObjectId.isValid(ticketId)){
@@ -30,6 +31,8 @@ async function createAnalysisTicket(ticketId, user) {
 
     const aiResponse = await ticketAnalysisService.analyzeTicket(ticket);
 
+    const suggestedResponse = await generateResponse(ticket, aiResponse);
+
     const response = await AIInteraction.create({
         ticket: ticket._id,
         requestedBy: user.sub,
@@ -41,7 +44,10 @@ async function createAnalysisTicket(ticketId, user) {
             summary: aiResponse.summary,
             reasoning: aiResponse.reasoning
         },
+        suggestedResponse: suggestedResponse
     });
+
+    console.log(response)
 
     return response;
 
