@@ -39,6 +39,12 @@ const knowledgeArticleSchema = new mongoose.Schema(
   }
 );
 
+knowledgeArticleSchema.index({
+  title: 'text',
+  content: 'text',
+  tags: 'text'
+})
+
 const KnowledgeArticle = mongoose.model(
   "KnowledgeArticle",
   knowledgeArticleSchema
