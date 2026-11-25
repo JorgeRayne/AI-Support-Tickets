@@ -1,8 +1,7 @@
 import testServer from "./testServer.js";
 import aiTicket from "../services/ai/aiTicket.js";
-import User from '../models/user.model.js'
-import Ticket from "../models/ticket.model.js";
-import aiController from "../contorllers/aiController.js";
+
+import '../models/index.js';
 
 
 async function app() {
