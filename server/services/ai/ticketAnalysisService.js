@@ -30,7 +30,7 @@ async function analyzeTicket(ticket) {
     let analysis;
 
     try {
-        analysis = JSON.parse(response.text);
+        analysis = JSON.parse(response.text.trim());
     } catch (error) {
         const parseError = new Error(
             'AI returned an invalid JSON response.'

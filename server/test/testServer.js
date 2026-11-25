@@ -4,7 +4,7 @@ import databaseConnection from '../config/database.js';
 const app = express();
 
 
-const testSServer = async () => {
+const testServer = async () => {
     try {
         await databaseConnection();
         app.listen(3000, () => {
@@ -16,4 +16,4 @@ const testSServer = async () => {
     }
 }
 
-export default testSServer;
+export default testServer;
