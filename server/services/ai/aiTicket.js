@@ -44,10 +44,9 @@ async function createAnalysisTicket(ticketId, user) {
             summary: aiResponse.summary,
             reasoning: aiResponse.reasoning
         },
-        suggestedResponse: suggestedResponse
+        suggestedResponse: suggestedResponse.suggestedResponse,
+        sources: suggestedResponse.articleUsed
     });
-
-    console.log(response)
 
     return response;
 
