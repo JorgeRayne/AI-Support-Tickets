@@ -18,7 +18,7 @@ async function createAiInteraction(req, res, next) {
 
         const newAiTicket = await aiTicket.createAnalysisTicket(ticketId, user);
 
-        console.log(newAiTicket);
+        return newAiTicket;
     } catch (error) {
         next(error);
     }

@@ -60,6 +60,23 @@ const aiInteractionSchema = new mongoose.Schema(
             default: null
         },
 
+        sources: {
+            type: [
+                {
+                    articleId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: "KnowledgeArticle",
+                        required: true,
+                    },
+                    title: {
+                        type: String,
+                        required: true
+                    }
+                }
+            ],
+            default: [],
+        },
+
         feedback: {
             status: {
                 type: String,
