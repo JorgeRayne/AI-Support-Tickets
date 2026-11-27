@@ -93,6 +93,16 @@ const aiInteractionSchema = new mongoose.Schema(
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User",
                 default: null
+            },
+
+            reviewedAt: {
+                type: Date,
+                defaul: null
+            },
+            
+            finalResponse: {
+                type: String,
+                default: null,
             }
         }
     },
